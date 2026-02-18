@@ -6,52 +6,63 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 // Sample data
-let users = [
-  { id: 1, name: 'John Doe', email: 'john@example.com' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com' }
+let hospitals = [
+  { id: 1, name: 'Chulalongkorn Hospital', address: 'Bangkok' },
+  { id: 2, name: 'Siriraj Hospital', address: 'Bangkok' }
 ];
 
 // Routes
 app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to the Node.js REST API' });
+  res.json({ message: 'Welcome to the Hospital API' });
 });
 
-app.get('/users', (req, res) => {
-  res.json(users);
+// Get all hospitals
+app.get('/api/v1/hospitals/', (req, res) => {
+  res.status(200).json({ success: true, count: hospitals.length, data: hospitals });
 });
 
-app.get('/users/:id', (req, res) => {
-  const user = users.find(u => u.id === parseInt(req.params.id));
-  if (!user) return res.status(404).json({ message: 'User not found' });
-  res.json(user);
+// Get single hospital
+app.get('/api/v1/hospitals/:id', (req, res) => {
+  const hospital = hospitals.find(h => h.id === parseInt(req.params.id));
+  if (!hospital) {
+    return res.status(404).json({ success: false, message: 'Hospital not found' });
+  }
+  res.status(200).json({ success: true, data: hospital });
 });
 
-app.post('/users', (req, res) => {
-  const newUser = {
-    id: users.length + 1,
-    name: req.body.name,
-    email: req.body.email
+// Create hospital
+app.post('/api/v1/hospitals/', (req, res) => {
+  const newHospital = {
+    id: hospitals.length + 1,
+    name: req.body?.name || 'New Hospital',
+    address: req.body?.address || 'Unknown'
   };
-  users.push(newUser);
-  res.status(201).json(newUser);
+  hospitals.push(newHospital);
+  res.status(200).json({ success: true, data: newHospital });
 });
 
-app.put('/users/:id', (req, res) => {
-  const user = users.find(u => u.id === parseInt(req.params.id));
-  if (!user) return res.status(404).json({ message: 'User not found' });
+// Update hospital
+app.put('/api/v1/hospitals/:id', (req, res) => {
+  const hospital = hospitals.find(h => h.id === parseInt(req.params.id));
+  if (!hospital) {
+    return res.status(404).json({ success: false, message: 'Hospital not found' });
+  }
   
-  user.name = req.body.name || user.name;
-  user.email = req.body.email || user.email;
+  hospital.name = req.body?.name || hospital.name;
+  hospital.address = req.body?.address || hospital.address;
   
-  res.json(user);
+  res.status(200).json({ success: true, data: hospital });
 });
 
-app.delete('/users/:id', (req, res) => {
-  const userIndex = users.findIndex(u => u.id === parseInt(req.params.id));
-  if (userIndex === -1) return res.status(404).json({ message: 'User not found' });
+// Delete hospital
+app.delete('/api/v1/hospitals/:id', (req, res) => {
+  const hospitalIndex = hospitals.findIndex(h => h.id === parseInt(req.params.id));
+  if (hospitalIndex === -1) {
+    return res.status(404).json({ success: false, message: 'Hospital not found' });
+  }
   
-  users.splice(userIndex, 1);
-  res.json({ message: 'User deleted successfully' });
+  hospitals.splice(hospitalIndex, 1);
+  res.status(200).json({ success: true, data: {} });
 });
 
 // Start server
